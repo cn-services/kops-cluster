@@ -1,0 +1,8 @@
+kubernetesVersion: 1.8.5
+kubernetesApiAccess: 0.0.0.0/0
+instanceGroupImage: kope.io/k8s-1.8-debian-jessie-amd64-hvm-ebs-2017-12-02
+bastionInstanceType: t2.micro
+masterInstanceType: m3.medium
+nodeInstanceType: t2.medium
+nodeMaxSize: 3
+nodeMinSize: 3

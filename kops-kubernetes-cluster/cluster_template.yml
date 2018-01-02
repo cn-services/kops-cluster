@@ -1,0 +1,162 @@
+apiVersion: kops/v1alpha2
+kind: Cluster
+metadata:
+  name: {{ .hostedZone }}
+spec:
+    api:
+      loadBalancer:
+        type: Public
+    authorization:
+      alwaysAllow: {}   
+    iam:
+      allowContainerRegistry: true
+      legacy: false 
+    project: {{ .project }}
+    cloudLabels:
+      Owner: {{ .owner }}
+    kubernetesVersion: {{ .kubernetesVersion }}
+    channel: stable
+    configBase: s3://{{ .s3BucketName }}/{{ .hostedZone }}
+    dnsZone: {{ .hostedZone }}
+    cloudProvider: aws
+    sshKeyName: {{ .pathPublicKey }}
+    networkCIDR: {{ .networkCIDR }}
+    kubernetesApiAccess:
+    - {{ .kubernetesApiAccess }}
+    networking:
+      calico: {}
+    topology:
+      masters: private
+      nodes: private
+      bastion:
+        enable: true
+        bastionPublicName: bastion.{{ .hostedZone }}
+      dns:
+        type: Public
+    masterPublicName: api.{{ .hostedZone }}
+    nonMasqueradeCIDR: 100.64.0.0/10
+    subnets:
+    - name: {{ .awsRegion }}a
+      type: Private
+      zone: {{ .awsRegion }}a
+    - name: {{ .awsRegion }}b
+      type: Private
+      zone: {{ .awsRegion }}b
+    - name: {{ .awsRegion }}c
+      type: Private
+      zone: {{ .awsRegion }}c
+    - name: utility-{{ .awsRegion }}a
+      type: Utility
+      zone: {{ .awsRegion }}a
+    - name: utility-{{ .awsRegion }}b
+      type: Utility
+      zone: {{ .awsRegion }}b
+    - name: utility-{{ .awsRegion }}c
+      type: Utility
+      zone: {{ .awsRegion }}c
+    etcdClusters:
+      - etcdMembers:
+        - instanceGroup: master-{{ .awsRegion }}a
+          name: a
+        - instanceGroup: master-{{ .awsRegion }}b
+          name: b
+        - instanceGroup: master-{{ .awsRegion }}c
+          name: c
+        name: main
+      - etcdMembers:
+        - instanceGroup: master-{{ .awsRegion }}a
+          name: a
+        - instanceGroup: master-{{ .awsRegion }}b
+          name: b
+        - instanceGroup: master-{{ .awsRegion }}c
+          name: c
+        name: events          
+---
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: {{ .hostedZone }}
+  name: bastions
+spec:
+  image: {{ .instanceGroupImage }}
+  machineType: {{ .bastionInstanceType }}
+  maxSize: 1
+  minSize: 1
+  nodeLabels:
+    kops.k8s.io/instancegroup: bastions
+  role: Bastion
+  subnets:
+  - utility-{{ .awsRegion }}a
+  - utility-{{ .awsRegion }}b
+  - utility-{{ .awsRegion }}c
+---
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: {{ .hostedZone }}
+  name: master-{{ .awsRegion }}a
+spec:
+  image: {{ .instanceGroupImage }}
+  machineType: {{ .masterInstanceType }}
+  maxSize: 1
+  minSize: 1
+  nodeLabels:
+    kops.k8s.io/instancegroup: master-{{ .awsRegion }}a
+  role: Master
+  subnets:
+  - {{ .awsRegion }}a
+---
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: {{ .hostedZone }}
+  name: master-{{ .awsRegion }}b
+spec:
+  image: {{ .instanceGroupImage }}
+  machineType: {{ .masterInstanceType }}
+  maxSize: 1
+  minSize: 1
+  nodeLabels:
+    kops.k8s.io/instancegroup: master-{{ .awsRegion }}b
+  role: Master
+  subnets:
+  - {{ .awsRegion }}b  
+---
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: {{ .hostedZone }}
+  name: master-{{ .awsRegion }}c
+spec:
+  image: {{ .instanceGroupImage }}
+  machineType: {{ .masterInstanceType }}
+  maxSize: 1
+  minSize: 1
+  nodeLabels:
+    kops.k8s.io/instancegroup: master-{{ .awsRegion }}c
+  role: Master
+  subnets:
+  - {{ .awsRegion }}c
+---
+apiVersion: kops/v1alpha2
+kind: InstanceGroup
+metadata:
+  labels:
+    kops.k8s.io/cluster: {{ .hostedZone }}
+  name: nodes
+spec:
+  image: {{ .instanceGroupImage }}
+  machineType: {{ .nodeInstanceType }}
+  maxSize: {{ .nodeMaxSize }}
+  minSize: {{ .nodeMinSize }}
+  nodeLabels:
+    kops.k8s.io/instancegroup: nodes
+  role: Node
+  subnets:
+  - {{ .awsRegion }}a
+  - {{ .awsRegion }}b
+  - {{ .awsRegion }}c

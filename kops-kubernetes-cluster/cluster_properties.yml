@@ -1,0 +1,7 @@
+owner: Julian
+project:
+hostedZone:
+awsRegion: 
+s3BucketName:  
+pathPublicKey: ~/.ssh/id_rsa.pub
+networkCIDR: 
