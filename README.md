@@ -1,5 +1,11 @@
 # Kubernetes Cluster
 
+[![](https://img.shields.io/github/license/jnonino/kops-cluster)](https://github.com/jnonino/kops-cluster)
+[![](https://img.shields.io/github/issues/jnonino/kops-cluster)](https://github.com/jnonino/kops-cluster)
+[![](https://img.shields.io/github/issues-closed/jnonino/kops-cluster)](https://github.com/jnonino/kops-cluster)
+[![](https://img.shields.io/github/languages/code-size/jnonino/kops-cluster)](https://github.com/jnonino/kops-cluster)
+[![](https://img.shields.io/github/repo-size/jnonino/kops-cluster)](https://github.com/jnonino/kops-cluster)
+
 With this code you will be able to deploy y aws a Kubernetes cluster with 3 masters deployed in three different availability zones in the selected region. Also, you can include as many slaves as you want spread on those three availability zones.
 
 ## Prerequisite
